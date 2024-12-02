@@ -162,3 +162,4 @@ cython_debug/
 .idea/
 /client_base.xlsx
 news_prog/src/config.py
+database.ini
