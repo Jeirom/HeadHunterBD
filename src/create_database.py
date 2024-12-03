@@ -1,6 +1,6 @@
 import os
 import psycopg2
-
+from src.api_headhunter import HeadHunterAPI
 class DBConnector:
 
     def __init__(self):
@@ -20,7 +20,11 @@ class DBConnector:
         cur.execude(f'CREATE DATABASE {database_name}')
 
         conn.close()
-
+        keyword = 'Python'
+        per_page = 20
+        api = HeadHunterAPI()
+        vacancies = api.get_vacancies(keyword, per_page)
+        print(vacancies[0:3])
         with psycopg2.connect(dbname=database_name, **params) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -48,6 +52,4 @@ class DBConnector:
         conn.autocommit = True
         cur.execute(query, params)
         result = cur.fetchall()
-        cur.close()
-        conn.close()
         return result
