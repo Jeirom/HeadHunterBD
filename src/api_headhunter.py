@@ -36,7 +36,7 @@ class HeadHunterAPI:
 
     @staticmethod
     def filter_name_company():
-        user_company = input('Введите название компаний: ')
+        user_company = ('Яндекс', 'Газпром', 'Вконтакте', 'VK', 'Тинькофф', 'Ozon', 'Авито', 'Lamoda', 'Контур', 'Холдинг Т1', 'БелОптовик')
         new_vacancy_list = []
         api = HeadHunterAPI()
         vacancies = api.get_vacancies()
@@ -60,5 +60,5 @@ class HeadHunterAPI:
 #     for item in vacancies:
 #         if item['employer']['name'] in user_company:
 #             new_vacancy_list.append(item)
-# result = HeadHunterAPI.filter_name_company()
-# print(result)
+result = HeadHunterAPI.filter_name_company()
+print(result)

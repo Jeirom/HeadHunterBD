@@ -1,6 +1,6 @@
 from src.api_headhunter import HeadHunterAPI
 from DBManager.DBManager import DBManager
-
+import psycopg2
 def main():
     print('Привет, user!')
     api = HeadHunterAPI

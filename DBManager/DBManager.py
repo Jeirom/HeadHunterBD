@@ -1,6 +1,9 @@
 import psycopg2
-from src.create_database import DBConnector
+
+from config import config
+from src.create_database import DBConnector, params
 from typing import Any
+from src.api_headhunter import HeadHunterAPI
 class DBManager(DBConnector):
 
     def __init__(self):
@@ -8,7 +11,7 @@ class DBManager(DBConnector):
 
     def get_companies_and_vacancies_count(self):
         """Метод для получения из базы данных названия компании и количества вакансий этой компании"""
-        execute_message = """SELECT employers.company_name, 
+        execute_message = """SELECT * FROM company, 
         COUNT(vacancies.employer_id)
         FROM employers JOIN vacancies 
         USING (employer_id) GROUP BY employer_id"""
@@ -39,37 +42,70 @@ class DBManager(DBConnector):
         execute_message = f"""SELECT * FROM vacancy WHERE vacancy_name is({search_word})"""
         return self.connect_to_db(execute_message)
 
-    @staticmethod
-    def save_data_to_database(data: list[dict[str, Any]], database_name: str, params: dict):
-        """Сохранение данных о каналах и видео в базу данных."""
-
-        conn = psycopg2.connect(dbname=database_name, **params)
+    def save_data_to_db(self):
+        """Записывает данные в базу данных."""
+        params = {'host': 'localhost',
+                  'user': 'postgres',
+                  'password': 123456789,
+                  'port': 5432,
+                  'client_encoding': 'utf=8'}
+        # db = DBConnector
+        # result = db.create_database('new', params)
+        api = HeadHunterAPI
+        vacancies = api.filter_name_company()
+        # params = config()
+        params = {'host': 'localhost',
+                  'user': 'new',
+                  'password': 123456789,
+                  'port': 5432,
+                  'client_encoding': 'utf=8'}
+        conn = psycopg2.connect(dbname='postgres', **params)
 
         with conn.cursor() as cur:
-            for channel in data:
-                channel_data = channel['channel']['snippet']
-                channel_stats = channel['channel']['statistics']
-                cur.execute(
-                    """
-                    INSERT INTO channels (title, views, subscribers, videos, channel_url)
-                    VALUES (%s, %s, %s, %s, %s)
-                    RETURNING channel_id
-                    """,
-                    (channel_data['title'], channel_stats['viewCount'], channel_stats['subscriberCount'],
-                     channel_stats['videoCount'], f"https://www.youtube.com/channel/{channel['channel']['id']}")
-                )
-                channel_id = cur.fetchone()[0]
-                videos_data = channel['videos']
-                for video in videos_data:
-                    video_data = video['snippet']
+            try:
+                for vacancy in vacancies:
+                    print(vacancy)
+                    vac_dict = vacancy.__dict__
+                    company_name = vac_dict.get("employer")
+                    employer_url = vac_dict.get("employer_url")
+                    """ Заполняем таблицу companies"""
                     cur.execute(
                         """
-                        INSERT INTO videos (channel_id, title, publish_date, video_url)
-                        VALUES (%s, %s, %s, %s)
+                        INSERT INTO company (name_company, company_url)
+                        VALUES (%s, %s)
+                        ON CONFLICT (company_name) DO NOTHING
+                        RETURNING company_id;
                         """,
-                        (channel_id, video_data['title'], video_data['publishedAt'],
-                         f"https://www.youtube.com/watch?v={video['id']['videoId']}")
+                        (
+                            company_name,
+                            employer_url,
+                        ),
                     )
+                    try:
+                        company_id = cur.fetchone()[0]
+                    except Exception:
+                        pass
 
-        conn.commit()
-        conn.close()
+                    """ Заполняем таблицу vacancies"""
+                    cur.execute(
+                        """INSERT INTO vacancies (
+                        vacancy_id,
+                        url,
+                        salary
+                        )
+                        VALUES (%s, %s, %s)""",
+                        (
+                            company_id,
+                            vac_dict.get("salary_to"),
+                            vac_dict.get("url"),
+                        ),
+                    )
+                    conn.commit()
+            except Exception as ex:
+                print(ex)
+                conn.rollback()
+            finally:
+                conn.close()
+
+db = DBManager.save_data_to_db
+print(db)
