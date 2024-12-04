@@ -33,12 +33,13 @@ class DBManager(DBConnector):
         execute_message = """SELECT salary FROM employers WHERE salary > SUM(salary)/COUNT(salary)"""
         return self.connect_to_db(execute_message)
 
-    @staticmethod
+
     def get_vacancies_with_keyword(self, search_word):
         """Получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python."""
         execute_message = f"""SELECT * FROM vacancy WHERE vacancy_name is({search_word})"""
         return self.connect_to_db(execute_message)
 
+    @staticmethod
     def save_data_to_database(data: list[dict[str, Any]], database_name: str, params: dict):
         """Сохранение данных о каналах и видео в базу данных."""
 

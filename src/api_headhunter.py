@@ -1,7 +1,7 @@
 import requests
 from typing import List, Dict
 
-from main import user_input
+
 
 
 class HeadHunterAPI:
@@ -21,16 +21,14 @@ class HeadHunterAPI:
         except Exception as e:
             raise Exception(f"Непредвиденная ошибка: {e}")
 
-
     def get_vacancies(self, per_page: int = 20) -> List[Dict]:
         """Метод получения вакансий по ключевому слову"""
         try:
             self._connect()
             # params = {"text": "", "per_page": per_page}
-            response = requests.get(self.__base_url, timeout=10) # Add timeout
-            response.raise_for_status() # Check for bad status codes
-            result = response.json().get("items", [])
-            return result
+            response = requests.get(self.__base_url, timeout=10)  # Add timeout
+            response.raise_for_status()  # Check for bad status codes
+            return response.json().get("items", [{}])  # Возвращает список словарей вместо списка элементов
         except requests.exceptions.RequestException as e:
             raise Exception(f"Ошибка запроса к API: {e}")
         except (KeyError, ValueError) as e:
@@ -40,17 +38,27 @@ class HeadHunterAPI:
     def filter_name_company():
         user_company = input('Введите название компаний: ')
         new_vacancy_list = []
-        vacancies = HeadHunterAPI.get_vacancies
+        api = HeadHunterAPI()
+        vacancies = api.get_vacancies()
+
         for item in vacancies:
             if item['employer']['name'] in user_company:
                 new_vacancy_list.append(item)
+        return new_vacancy_list
 
-# test = ('БелОптовик', 'Рост Развитие Решение')
+# keyword = 'БелОптовик'
+# per_page = 20
 # api = HeadHunterAPI()
 # vacancies = api.get_vacancies()
-# print(vacancies)
-# test1 = []
-# for i in vacancies:
-#     if i['employer']['name'] in test:
-#         test1.append(i)
-# print(test1)
+# print(vacancies[0:3])
+
+
+# def filter_name_company():
+#     user_company = input('Введите название компаний: ')
+#     new_vacancy_list = []
+#     vacancies = HeadHunterAPI.get_vacancies
+#     for item in vacancies:
+#         if item['employer']['name'] in user_company:
+#             new_vacancy_list.append(item)
+# result = HeadHunterAPI.filter_name_company()
+# print(result)
