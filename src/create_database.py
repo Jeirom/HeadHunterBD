@@ -54,9 +54,6 @@ class DBCreator:
                         salary_from INT,
                         salary_to INT,
                         currency VARCHAR(5),
-                        requirement TEXT,
-                        responsibility TEXT,
-                        schedule VARCHAR(30),
                         employment VARCHAR(30),
                         url TEXT
                     )"""
