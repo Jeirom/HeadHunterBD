@@ -54,17 +54,13 @@ class DBManager(DBConnector):
         api = HeadHunterAPI
         vacancies = api.filter_name_company()
         # params = config()
-        params = {'host': 'localhost',
-                  'user': 'new',
-                  'password': 123456789,
-                  'port': 5432,
-                  'client_encoding': 'utf=8'}
+
         conn = psycopg2.connect(dbname='postgres', **params)
 
         with conn.cursor() as cur:
             try:
                 for vacancy in vacancies:
-                    print(vacancy)
+
                     vac_dict = vacancy.__dict__
                     company_name = vac_dict.get("employer")
                     employer_url = vac_dict.get("employer_url")
