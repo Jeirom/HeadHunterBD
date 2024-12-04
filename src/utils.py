@@ -3,8 +3,6 @@ import psycopg2
 
 
 def filter_name_company():
-    user_company = [
-    'Яндекс', 'Газпром', 'Вконтакте', 'VK', 'Тинькофф', 'Ozon', 'Авито', 'Lamoda', 'Контур', 'Холдинг Т1', 'БелОптовик']
     new_vacancy_list = []
     api = HeadHunterAPI()
     vacancies = api.get_vacancies()

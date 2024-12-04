@@ -19,6 +19,7 @@ class HeadHunterAPI:
         except Exception as e:
             raise Exception(f"Непредвиденная ошибка: {e}")
 
+
     def get_vacancies(self, per_page: int = 20) -> List[Dict]:
         """Метод получения вакансий по ключевому слову"""
         try:
@@ -26,10 +27,9 @@ class HeadHunterAPI:
             # params = {"text": "", "per_page": per_page}
             response = requests.get(self.__base_url, timeout=10)  # Add timeout
             response.raise_for_status()  # Check for bad status codes
-            return response.json().get("items", [{}])  # Возвращает список словарей вместо списка элементов
+            return response.json().get("items", [{}]) # Возвращает список словарей вместо списка элементов
         except requests.exceptions.RequestException as e:
             raise Exception(f"Ошибка запроса к API: {e}")
         except (KeyError, ValueError) as e:
             raise Exception(f"Ошибка обработки ответа API: {e}")  # Handle JSON parsing errors
-
 

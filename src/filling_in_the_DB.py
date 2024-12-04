@@ -1,19 +1,22 @@
 from config import COMPANY_NAMES
 from src.api_headhunter import HeadHunterAPI
-
+from src.vacancy import Vacancy
 
 def get_vacancies_from_hh() -> list[dict]:
     """Возвращает список словарей с вакансиями с hh.ru.
-    В список попадут только те вакансии, компании которых есть в списке COMPANY_NAMES"""
-    COMPANY_NAMES = ['БелОптовик', 'Яндекс Команда для бизнеса', 'Чужеземка', 'Яндекс Команда для бизнеса',
+    В список попадут только те вакансии, компании которых есть в списке сompany names"""
+
+    company_names = ['БелОптовик', 'Яндекс Команда для бизнеса', 'Чужеземка', 'Яндекс Команда для бизнеса',
                      'CALLTRAFFIC', 'БККгрупп', 'i see real', 'BRAVE', 'Макси Бай Медиа',
                      'Shaurmeals Красноярск (ИП Маргулис Борис Олегович)']
+
     api = HeadHunterAPI
-    vacancies = api.get_vacancies
-    list_for_bd = {}
+    vacancies = api.get_vacancies()
+    list_for_bd = []
+
     for item in vacancies:
         employer = item.get("employer")["name"]
-        for company_name in COMPANY_NAMES:
+        for company_name in company_names:
             if company_name.lower() in employer.lower():
                 employer_url = item.get("employer")["alternate_url"]
                 title = item["name"]
@@ -46,5 +49,7 @@ def get_vacancies_from_hh() -> list[dict]:
                     employment,
                     url,
                 )
+                list_for_bd.append(vacancy)
+    return list_for_bd
 
-    return vacancies
+get_vacancies_from_hh()
