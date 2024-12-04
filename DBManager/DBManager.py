@@ -1,107 +1,193 @@
 import psycopg2
-
 from config import config
-from src.create_database import DBConnector, params
-from typing import Any
-from src.api_headhunter import HeadHunterAPI
-class DBManager(DBConnector):
+
+
+class DBManager:
+    """Класс для получения данных по вакансиям и компаниям из БД"""
 
     def __init__(self):
-        super().__init__()
+        self.params = config()
+        self.conn = psycopg2.connect(dbname="postgres", **self.params)
+        self.cur = self.conn.cursor()
 
     def get_companies_and_vacancies_count(self):
-        """Метод для получения из базы данных названия компании и количества вакансий этой компании"""
-        execute_message = """SELECT * FROM company, 
-        COUNT(vacancies.employer_id)
-        FROM employers JOIN vacancies 
-        USING (employer_id) GROUP BY employer_id"""
-        return self.connect_to_db(execute_message)
+        """Печатает список всех компаний и количество вакансий у каждой компании."""
+        query = """
+                SELECT c.company_name, COUNT(v.vacancy_id) AS vacancy_count
+                FROM companies c
+                LEFT JOIN vacancies v ON c.company_id = v.company_id
+                GROUP BY c.company_id
+                ORDER BY c.company_name;
+            """
 
+        try:
+            self.cur.execute(query)
+            results = self.cur.fetchall()
+            # Печатаем результаты
+            print("Список компаний и количество вакансий:\n")
+            for row in results:
+                company_name, vacancy_count = row
+                print(f"Компания: {company_name}, Количество вакансий: {vacancy_count}")
+            print(f"Всего {len(results)} компаний.")
+            print("-" * 50)
 
-    def get_all_vacancies(self):
-        """Получает список всех вакансий с указанием названия компании,
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+        finally:
+            self.cur.close()
+            self.conn.close()
+
+    def get_all_vacancies(self) -> None:
+        """Печатает список всех вакансий с указанием названия компании,
         названия вакансии и зарплаты и ссылки на вакансию."""
-        execute_message = """SELECT employers.company_name, vacancy.vacancy_name, vacancy.salary, vacancy.link"""
-        return self.connect_to_db(execute_message)
+        query = """
+                SELECT c.company_name, v.vacancy_name, 
+                COALESCE(v.salary_from, 0) AS salary_from, 
+                COALESCE(v.salary_to, 0) AS salary_to, v.url
+                FROM vacancies v
+                JOIN companies c ON v.company_id = c.company_id
+                ORDER BY c.company_name"""
 
+        try:
+            self.cur.execute(query)
+            results = self.cur.fetchall()
 
-    def get_avg_salary(self):
-        """Получает среднюю зарплату по вакансиям."""
-        execute_message = """SELECT AVG(salary) FROM employers"""
-        return self.connect_to_db(execute_message)
+            # Печатаем результаты
+            print("Список вакансий:")
+            for row in results:
+                company_name, vacancy_name, salary_from, salary_to, url = row
+                print(
+                    f"Компания: {company_name}, Вакансия: {vacancy_name}, Зарплата: от {salary_from} до {salary_to}, "
+                    f"Ссылка: {url}"
+                )
+            print(f"Всего {len(results)} вакансий.")
+            print("-" * 50)
 
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
-    def get_vacancies_with_higher_salary(self):
-        """Получает список всех вакансий, у которых зарплата выше средней по всем вакансиям."""
-        execute_message = """SELECT salary FROM employers WHERE salary > SUM(salary)/COUNT(salary)"""
-        return self.connect_to_db(execute_message)
+        finally:
+            self.cur.close()
+            self.conn.close()
 
+    def get_avg_salary(self) -> None:
+        """Печатает среднюю зарплату по вакансиям."""
+        query = """
+                    SELECT AVG((salary_from + salary_to) / 2.0) AS average_salary
+                    FROM vacancies
+                    WHERE salary_from IS NOT NULL AND salary_to IS NOT NULL
+                """
 
-    def get_vacancies_with_keyword(self, search_word):
-        """Получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python."""
-        execute_message = f"""SELECT * FROM vacancy WHERE vacancy_name is({search_word})"""
-        return self.connect_to_db(execute_message)
+        try:
+            self.cur.execute(query)
+            result = self.cur.fetchall()
 
-    def save_data_to_db(self):
-        """Записывает данные в базу данных."""
-        params = {'host': 'localhost',
-                  'user': 'postgres',
-                  'password': 123456789,
-                  'port': 5432,
-                  'client_encoding': 'utf=8'}
-        # db = DBConnector
-        # result = db.create_database('new', params)
-        api = HeadHunterAPI
-        vacancies = api.filter_name_company()
-        # params = config()
+            # Печатаем результаты
+            if result and result[0] is not None:
+                avg_salary = round(float(result[0][0]), 2)
+                print(f"Средняя зарплата по вакансиям: {avg_salary}")
+            else:
+                print("Нет доступных данных о зарплате.")
+            print("-" * 50)
 
-        conn = psycopg2.connect(dbname='postgres', **params)
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
-        with conn.cursor() as cur:
-            try:
+        finally:
+            self.cur.close()
+            self.conn.close()
+
+    def get_vacancies_with_higher_salary(self) -> None:
+        """Печатает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
+        avg_salary_query = """
+                SELECT AVG((salary_from + salary_to) / 2.0) AS average_salary
+                FROM vacancies
+                WHERE salary_from IS NOT NULL AND salary_to IS NOT NULL;
+                """
+
+        try:
+            self.cur.execute(avg_salary_query)
+            avg_salary_result = self.cur.fetchone()
+            avg_salary = (
+                float(avg_salary_result[0])
+                if avg_salary_result and avg_salary_result[0] is not None
+                else 0
+            )
+
+            vacancies_query = """
+                    SELECT v.vacancy_name, v.salary_from, v.salary_to, v.city, v.url
+                    FROM vacancies v
+                    WHERE (v.salary_from + v.salary_to) / 2.0 > %s;
+                    """
+
+            self.cur.execute(vacancies_query, (avg_salary,))
+            vacancies = self.cur.fetchall()
+
+            # Печатаем результаты
+            if vacancies:
+                print("Список вакансий с зарплатой выше средней:")
                 for vacancy in vacancies:
-
-                    vac_dict = vacancy.__dict__
-                    company_name = vac_dict.get("employer")
-                    employer_url = vac_dict.get("employer_url")
-                    """ Заполняем таблицу companies"""
-                    cur.execute(
-                        """
-                        INSERT INTO company (name_company, company_url)
-                        VALUES (%s, %s)
-                        ON CONFLICT (company_name) DO NOTHING
-                        RETURNING company_id;
-                        """,
-                        (
-                            company_name,
-                            employer_url,
-                        ),
+                    print(
+                        f"Вакансия: {vacancy[0]}, Зарплата от: {vacancy[1]}, "
+                        f"Зарплата до: {vacancy[2]}, Город: {vacancy[3]}, Ссылка на вакансию: {vacancy[4]}"
                     )
-                    try:
-                        company_id = cur.fetchone()[0]
-                    except Exception:
-                        pass
+            else:
+                print("Нет вакансий с зарплатой выше средней.")
+            print(f"Всего {len(vacancies)} вакансии.")
+            print("-" * 50)
 
-                    """ Заполняем таблицу vacancies"""
-                    cur.execute(
-                        """INSERT INTO vacancies (
-                        vacancy_id,
-                        url,
-                        salary
-                        )
-                        VALUES (%s, %s, %s)""",
-                        (
-                            company_id,
-                            vac_dict.get("salary_to"),
-                            vac_dict.get("url"),
-                        ),
-                    )
-                    conn.commit()
-            except Exception as ex:
-                print(ex)
-                conn.rollback()
-            finally:
-                conn.close()
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
-db = DBManager.save_data_to_db
-print(db)
+        finally:
+            self.cur.close()
+            self.conn.close()
+
+    def get_vacancies_with_keyword(self, keywords: list[str]) -> None:
+        """Возвращает список всех вакансий, в названии которых содержатся переданные в
+        метод слова, например python."""
+        conditions = " OR ".join(["vacancy_name ILIKE %s " for _ in keywords])
+        query = f"""
+               SELECT v.vacancy_id, v.vacancy_name, c.company_name, v.city, v.salary_from, v.salary_to, v.currency
+               FROM vacancies v
+               JOIN companies c ON v.company_id = c.company_id
+               WHERE {conditions}
+           """
+        params = [f"%{keyword}%" for keyword in keywords]
+
+        try:
+            self.cur.execute(query, params)
+            vacancies = self.cur.fetchall()
+            # Печатаем результаты
+            for vacancy in vacancies:
+                print(
+                    {
+                        "id": vacancy[0],
+                        "Вакансия": vacancy[1],
+                        "Компания": vacancy[2],
+                        "Город": vacancy[3],
+                        "Зарплата от": vacancy[4],
+                        "Зарплата до": vacancy[5],
+                        "Валюта": vacancy[6],
+                    }
+                )
+            print(f"\nНайдено {len(vacancies)} вакансий.")
+            print("-" * 50)
+
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+        finally:
+            self.cur.close()
+            self.conn.close()
+
+
+
+
+
+
+
+
+
+

@@ -2,8 +2,6 @@ import requests
 from typing import List, Dict
 
 
-
-
 class HeadHunterAPI:
     """Класс для работы с hh.ru"""
 
@@ -34,31 +32,4 @@ class HeadHunterAPI:
         except (KeyError, ValueError) as e:
             raise Exception(f"Ошибка обработки ответа API: {e}")  # Handle JSON parsing errors
 
-    @staticmethod
-    def filter_name_company():
-        user_company = ('Яндекс', 'Газпром', 'Вконтакте', 'VK', 'Тинькофф', 'Ozon', 'Авито', 'Lamoda', 'Контур', 'Холдинг Т1', 'БелОптовик')
-        new_vacancy_list = []
-        api = HeadHunterAPI()
-        vacancies = api.get_vacancies()
 
-        for item in vacancies:
-            if item['employer']['name'] in user_company:
-                new_vacancy_list.append(item)
-        return new_vacancy_list
-
-# keyword = 'БелОптовик'
-# per_page = 20
-# api = HeadHunterAPI()
-# vacancies = api.get_vacancies()
-# print(vacancies[0:3])
-
-
-# def filter_name_company():
-#     user_company = input('Введите название компаний: ')
-#     new_vacancy_list = []
-#     vacancies = HeadHunterAPI.get_vacancies
-#     for item in vacancies:
-#         if item['employer']['name'] in user_company:
-#             new_vacancy_list.append(item)
-result = HeadHunterAPI.filter_name_company()
-print(result)

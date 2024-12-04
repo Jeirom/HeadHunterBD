@@ -16,3 +16,16 @@ def config(filename="database.ini", section="postgresql"):
 
     return db
 
+COMPANY_NAMES = [
+    'Сбер',
+    'БТБ',
+    'Студия Артемия Лебедева',
+    'РЖД',
+    'VK',
+    'Яндекс',
+    'Авито',
+    'Ozon',
+    'Ростелеком',
+    'Газпром',
+    'Литрес',
+]
