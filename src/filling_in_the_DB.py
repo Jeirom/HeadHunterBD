@@ -47,7 +47,7 @@ def get_vacancies_from_hh() -> list[dict]:
                 )
                 list_for_bd.append(vacancy)
 
-    print(list_for_bd[0].url)
+
     return list_for_bd
 
 

@@ -1,15 +1,8 @@
 import psycopg2
 
-from main import params
-
 
 class DBCreator:
 
-    params = {'host': 'localhost',
-              'user': 'postgres',
-              'password': 123456789,
-              'port': 5432,
-              'client_encoding': 'utf=8'}
 
     def __init__(self, db_name: str, params: dict):
         self.db_name = db_name
@@ -19,7 +12,7 @@ class DBCreator:
         """Создает базу данных."""
 
         """ Подключаемся к  PostgreSQL"""
-        conn = psycopg2.connect(dbname="postgres", **self.params)
+        conn = psycopg2.connect(dbname=self.db_name, **self.params)
         conn.autocommit = True
         cur = conn.cursor()
 
@@ -62,5 +55,3 @@ class DBCreator:
         conn.close()
 
 
-con1 = DBCreator('postgres1', params)
-con1.create_database()
