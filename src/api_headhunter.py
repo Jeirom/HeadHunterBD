@@ -20,7 +20,7 @@ class HeadHunterAPI:
             raise Exception(f"Непредвиденная ошибка: {e}")
 
 
-    def get_vacancies(self, per_page: int = 20) -> List[Dict]:
+    def get_vacancies(self) -> List[Dict]:
         """Метод получения вакансий по ключевому слову"""
         try:
             self._connect()

@@ -15,17 +15,3 @@ def config(filename="database.ini", section="postgresql"):
         print(f"An error occurred: {e}") #Prints error to console instead of raising
 
     return db
-
-COMPANY_NAMES = [
-    'Сбер',
-    'БТБ',
-    'Студия Артемия Лебедева',
-    'РЖД',
-    'VK',
-    'Яндекс',
-    'Авито',
-    'Ozon',
-    'Ростелеком',
-    'Газпром',
-    'Литрес',
-]
