@@ -2,7 +2,7 @@ import psycopg2
 
 
 class DBCreator:
-
+    """Класс создания дата базы."""
 
     def __init__(self, db_name: str, params: dict):
         self.db_name = db_name
@@ -20,7 +20,6 @@ class DBCreator:
         cur.execute(f"DROP DATABASE IF EXISTS {self.db_name};")
         cur.execute(f"CREATE DATABASE {self.db_name};")
         conn.close()
-
 
     def create_database(self):
         """Создает таблицы в базе данных."""
@@ -53,5 +52,3 @@ class DBCreator:
             )
         conn.commit()
         conn.close()
-
-

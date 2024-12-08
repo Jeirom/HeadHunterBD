@@ -1,15 +1,16 @@
 class Vacancy:
+    """Класс вакансий. Принимает в себя данные с filling_in_the_DB, отправляет данные в бд"""
     def __init__(
-            self,
-            employer,
-            employer_url,
-            title,
-            city,
-            salary_from,
-            salary_to,
-            currency,
-            employment,
-            url,
+        self,
+        employer,
+        employer_url,
+        title,
+        city,
+        salary_from,
+        salary_to,
+        currency,
+        employment,
+        url,
     ):
         self.employer = employer
         self.employer_url = employer_url
