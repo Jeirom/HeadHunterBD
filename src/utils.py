@@ -2,6 +2,8 @@ import psycopg2
 from src.create_database import DBCreator
 from src.filling_in_the_DB import get_vacancies_from_hh
 from src.vacancy import Vacancy
+from DBManager import DBManager
+
 
 loading = (
     "loading",
@@ -83,6 +85,57 @@ loading = (
 #     cur.execute(query, params)
 #     result = cur.fetchall()
 #     return result
+
+def submenu() -> int:
+    """Реализация подменю, возвращает номер меню"""
+
+    print(
+        "2 - Получить список всех компаний и количество вакансий у каждой компании. \n"
+        "3 - Получить список всех вакансий.\n"
+        "4 - Получить среднюю зарплату по вакансиям.\n"
+        "5 - Получить список всех вакансий, у которых зарплата выше средней.\n"
+        "6 - Получить список вакансий по ключевым словам.\n"
+        "8 - Выход.\n"
+    )
+
+    while True:
+        answer = input("Выберите действие: ").strip()
+        if answer.isdigit():
+            answer = int(answer)
+            if 1 <= answer <= 8:
+                break
+            else:
+                print("Можно ввести только число от 1 до 8!")
+        else:
+            print("Можно ввести только целое число")
+    print("*" * 50)
+    return answer
+
+
+def user_interaction() -> None:
+    """Основная функция по взаимодействию с пользователем"""
+
+    while True:
+        answer = submenu()
+        if answer == 2:
+            db = DBManager()
+            db.get_companies_and_vacancies_count()
+        elif answer == 3:
+            db = DBManager()
+            db.get_all_vacancies()
+        elif answer == 4:
+            db = DBManager()
+            db.get_avg_salary()
+        elif answer == 5:
+            db = DBManager()
+            db.get_vacancies_with_higher_salary()
+        elif answer == 6:
+            keywords = input("Введите слова через запятую: ").split(",")
+            db = DBManager()
+            db.get_vacancies_with_keyword(keywords)
+        elif answer == 8:
+            print("Благодарим за использование программы.\n      До свидания.")
+            break
 
 
 def save_to_bd(vacancies, database, params):
@@ -176,6 +229,7 @@ def welcome_script_next(db_name, params):
     for i in loading:
         print("*" * waiting)
         waiting += 1
+    user_interaction() # переводим юзера на функционал выбора действий с данными
 
 
 # else:
