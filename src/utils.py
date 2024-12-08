@@ -1,4 +1,6 @@
 import psycopg2
+
+from config import config
 from src.create_database import DBCreator
 from src.filling_in_the_DB import get_vacancies_from_hh
 from src.vacancy import Vacancy
@@ -140,13 +142,14 @@ def user_interaction() -> None:
 
 def save_to_bd(vacancies, database, params):
     """ Функция сохранения данных в DATABASE """
-    params = {
-        "host": "localhost",
-        "user": "postgres",
-        "password": 123456789,
-        "port": 5432,
-        "client_encoding": "utf=8",
-    }
+    # params = {
+    #     "host": "localhost",
+    #     "user": "postgres",
+    #     "password": 123456789,
+    #     "port": 5432,
+    #     "client_encoding": "utf=8",
+    # }
+    params = config()
     conn = psycopg2.connect(dbname=database, **params)
 
     with conn.cursor() as cur:
@@ -217,13 +220,14 @@ def welcome_script_next(db_name, params):
     print("*" * 50)
     print("Вакансии и компании записываются в базу данных.. ожидайте.")
 
-    params = {
-        "host": "localhost",
-        "user": "postgres",
-        "password": 123456789,
-        "port": 5432,
-        "client_encoding": "utf=8",
-    }
+    # params = {
+    #     "host": "localhost",
+    #     "user": "postgres",
+    #     "password": 123456789,
+    #     "port": 5432,
+    #     "client_encoding": "utf=8",
+    # }
+    params = config()
     save_to_bd(vacancy, db_name, params)
     waiting = 1
     for i in loading:
@@ -256,14 +260,14 @@ def welcome_script():
     )
     db_name = input("Введите название для вашей БД: ")
     #
-    params = {
-        "host": "localhost",
-        "user": "postgres",
-        "password": 123456789,
-        "port": 5432,
-        "client_encoding": "utf=8",
-    }
-
+    # params = {
+    #     "host": "localhost",
+    #     "user": "postgres",
+    #     "password": 123456789,
+    #     "port": 5432,
+    #     "client_encoding": "utf=8",
+    # }
+    params = config()
     if user_choice == 2:
         print("Такие ответы мы не принимаем!")
     # try:
