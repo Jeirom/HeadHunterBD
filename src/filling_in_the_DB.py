@@ -6,7 +6,8 @@ def get_vacancies_from_hh() -> list[dict]:
     """Возвращает список словарей с вакансиями с hh.ru.
     В список попадут только те вакансии, компании которых есть в списке сompany names"""
 
-    company_names = ("БелОптовик", "Яндекс Команда для бизнеса")
+    company_names = ("БелОптовик", "Яндекс Команда для бизнеса", "Ozon", "VK", "Студия Лебедева", "ГазПром", "Лукойл",
+                     "Сбербанк", "Т-Банк", "Slumberger")
     api = HeadHunterAPI()
     vacancies = api.get_vacancies()
     print(vacancies)
